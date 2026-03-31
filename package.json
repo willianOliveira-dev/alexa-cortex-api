@@ -12,7 +12,7 @@
 		"prepare": "husky"
 	},
 	"engines": {
-		"node": "24.14.0",
+		"node": ">=24.14.0",
 		"pnpm": ">=10.30.3"
 	},
 	"keywords": [],
