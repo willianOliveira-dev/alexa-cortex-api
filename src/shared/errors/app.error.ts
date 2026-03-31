@@ -12,37 +12,43 @@ export class AppError extends Error {
 }
 
 export class NotFoundError extends AppError {
-  constructor(r: string) {
-    super(`${r} não encontrado`, 404, 'NOT_FOUND');
+  constructor(resource: string) {
+    super(`${resource} não encontrado`, 404, 'NOT_FOUND');
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(m: string) {
-    super(m, 409, 'CONFLICT');
+  constructor(message: string) {
+    super(message, 409, 'CONFLICT');
   }
 }
 
 export class BadRequestError extends AppError {
-  constructor(m: string) {
-    super(m, 400, 'BAD_REQUEST');
+  constructor(message: string) {
+    super(message, 400, 'BAD_REQUEST');
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(m = 'Não autorizado') {
-    super(m, 401, 'UNAUTHORIZED');
+  constructor(message = 'Não autorizado') {
+    super(message, 401, 'UNAUTHORIZED');
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(m = 'Acesso negado') {
-    super(m, 403, 'FORBIDDEN');
+  constructor(message = 'Acesso negado') {
+    super(message, 403, 'FORBIDDEN');
   }
 }
 
 export class InternalServerError extends AppError {
-  constructor(m = 'Erro interno do servidor') {
-    super(m, 500, 'INTERNAL_SERVER_ERROR');
+  constructor(message = 'Erro interno do servidor') {
+    super(message, 500, 'INTERNAL_SERVER_ERROR');
+  }
+}
+
+export class GatewayTimeoutError extends AppError {
+  constructor(message = 'O serviço externo não respondeu a tempo') {
+    super(message, 504, 'GATEWAY_TIMEOUT');
   }
 }
