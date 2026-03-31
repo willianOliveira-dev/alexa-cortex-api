@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nero-api
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    env_file:
+      - .env
