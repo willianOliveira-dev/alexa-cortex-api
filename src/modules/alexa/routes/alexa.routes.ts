@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { GroqServices } from "../../groq/services/groq.service";
-import { AlexaWebhookBodySchema, AlexaWebhookResponseSchema } from "../schemas/alexa.schemas";
+import { GroqServices } from "../../groq/services/groq.service.js";
+import { AlexaWebhookBodySchema, AlexaWebhookResponseSchema } from "../schemas/alexa.schemas.js";
 import {
   renderWelcome,
   renderGoodbye,
   renderSpeak,
   renderError,
   renderNotUnderstood,
-} from "../renders/alexa.render";
+} from "../renders/alexa.render.js";
 
 const groqService = new GroqServices();
 

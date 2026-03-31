@@ -5,7 +5,7 @@ import type {
   FastifyRequest,
 } from 'fastify';
 import fp from 'fastify-plugin';
-import { AppError } from '../shared/errors/app.error';
+import { AppError } from '../shared/errors/app.error.js';
 
 function handleValidationError(
   error: FastifyError,

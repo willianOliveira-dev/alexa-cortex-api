@@ -1,4 +1,4 @@
-import type { AlexaWebhookResponse } from "../schemas/alexa.schemas"; 
+import type { AlexaWebhookResponse } from "../schemas/alexa.schemas.js"; 
 
 type OutputSpeech = AlexaWebhookResponse["response"]["outputSpeech"];
 

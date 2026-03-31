@@ -2,7 +2,7 @@ import swagger from '@fastify/swagger';
 import scalarApiReference from '@scalar/fastify-api-reference';
 import fp from 'fastify-plugin';
 import { jsonSchemaTransform } from 'fastify-type-provider-zod';
-import { env } from '../config/env.config';
+import { env } from '../config/env.config.js';
 
 export default fp(
     async (app) => {

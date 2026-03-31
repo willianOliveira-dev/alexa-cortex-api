@@ -1,5 +1,5 @@
-import { groq } from "../../../lib/ai/groq-client.lib";
-import { ASSISTANT_SYSTEM_PROMPT } from "../../../prompts/assistant.system-prompt";
+import { groq } from "../../../lib/ai/groq-client.lib.js";
+import { ASSISTANT_SYSTEM_PROMPT } from "../../../prompts/assistant.system-prompt.js";
 
 interface Message {
   role: "system" | "user" | "assistant";

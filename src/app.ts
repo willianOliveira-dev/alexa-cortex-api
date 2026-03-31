@@ -1,9 +1,9 @@
 import Fastify from 'fastify'
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod'
-import { env } from './config/env.config'
+import { env } from './config/env.config.js'
 import { randomUUID } from 'node:crypto'
-import { registerPlugins } from './plugins/index.plugin'
-import { registerRoutes } from './routes/root.routes'
+import { registerPlugins } from './plugins/index.plugin.js'
+import { registerRoutes } from './routes/root.routes.js'
 
 export const bootstrap = async () => {
     const app = Fastify({

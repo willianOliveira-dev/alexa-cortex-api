@@ -1,6 +1,6 @@
 import rateLimit, { type FastifyRateLimitOptions } from '@fastify/rate-limit';
 import fp from 'fastify-plugin';
-import { env } from '../config/env.config';
+import { env } from '../config/env.config.js';
 
 
 export default fp<FastifyRateLimitOptions>(

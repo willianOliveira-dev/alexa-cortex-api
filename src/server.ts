@@ -1,5 +1,5 @@
-import { env } from "./config/env.config";
-import { bootstrap } from "./app";
+import { env } from "./config/env.config.js";
+import { bootstrap } from "./app.js";
 
 async function server() {
     const app = await bootstrap();

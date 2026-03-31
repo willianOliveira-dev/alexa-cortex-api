@@ -1,6 +1,6 @@
 import cors, { type FastifyCorsOptions } from '@fastify/cors';
 import fp from 'fastify-plugin';
-import { env } from '../config/env.config';
+import { env } from '../config/env.config.js';
 
 const AMAZON_ALEXA_ORIGINS = [
   'https://pitangui.amazon.com',    
