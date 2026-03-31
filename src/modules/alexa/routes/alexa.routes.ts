@@ -10,9 +10,13 @@ import {
   renderSpeak,
   renderWelcome,
 } from '../renders/alexa.render.js';
+import { ChatRepository } from '../repositories/chat.repository.js';
 import { AlexaWebhookBodySchema, AlexaWebhookResponseSchema } from '../schemas/alexa.schemas.js';
+import { ChatService } from '../services/chat.service.js';
 
+const chatRepository = new ChatRepository();
 const groqService = new GroqServices();
+const chatService = new ChatService(chatRepository, groqService);
 
 const ALEXA_TIMEOUT_MS = 6_000;
 
@@ -37,6 +41,7 @@ export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
     handler: async (request, reply) => {
       const { request: alexaRequest, session } = request.body;
       const { sessionId } = session;
+      const { userId } = session.user;
 
       switch (alexaRequest.type) {
         case 'LaunchRequest':
@@ -74,7 +79,7 @@ export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
       );
 
       const aiResponse = await Promise.race([
-        groqService.chat([{ role: 'user', content: query }]),
+        chatService.processUtterance({ sessionId, userId, query }),
         timeoutPromise,
       ]);
 
