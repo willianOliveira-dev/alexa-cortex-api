@@ -53,22 +53,9 @@ export default fp<FastifyCorsOptions>(
     });
 
     app.addHook('onRequest', async (request, reply) => {
-      if (!request.url.startsWith('/webhook/alexa')) return;
+      if (!request.url.startsWith('/api/v1/webhook/alexa')) return;
 
       if (env.NODE_ENV !== 'production') return;
-
-      const userAgent = request.headers['user-agent'] ?? '';
-      const hasAlexaAgent = AMAZON_USER_AGENTS.some((agent) =>
-        userAgent.includes(agent),
-      );
-
-      if (!hasAlexaAgent) {
-        app.log.warn({ userAgent, ip: request.ip }, 'Requisição Bloqueada: User-Agent inválido');
-        return reply.status(403).send({
-          code: 'FORBIDDEN',
-          message: 'Acesso negado',
-        });
-      }
 
       const hasSignatureCert = Boolean(request.headers['signaturecertchainurl']);
       const hasSignature = Boolean(request.headers['signature']);
