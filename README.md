@@ -9,6 +9,8 @@
   ![Fastify](https://img.shields.io/badge/Fastify-5.8-000000?style=flat-square&logo=fastify)
   ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript)
   ![Groq](https://img.shields.io/badge/Groq-AI-F55036?style=flat-square)
+  ![Neon](https://img.shields.io/badge/Neon-Postgres-00E599?style=flat-square&logo=postgresql)
+  ![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F?style=flat-square&logo=drizzle)
   ![Zod](https://img.shields.io/badge/Zod-Validation-3E67B1?style=flat-square&logo=zod)
 </div>
 
@@ -16,7 +18,9 @@
 
 ### 1. Visão Geral
 
-A **Alexa Cortex API** foi criada para resolver a limitação das respostas roteirizadas tradicionais (intents) da Alexa. Usando o ambiente Fastify, esta API atua como uma escuta inteligente: ela coleta os comandos de fala livre do usuário, envia a mensagem para um modelo de inteligência artificial de ponta (rodando na plataforma da Groq) e devolve uma resposta natural por voz. O resultado final é que usar a Alexa deixa de parecer um sistema de robôs com palavras chaves estritas, transformando o uso do smart-speaker numa conversa não-linear e intuitiva de forma geral.
+A **Alexa Cortex API** foi criada para resolver a limitação das respostas roteirizadas tradicionais (intents) da Alexa. Usando o ambiente Fastify, esta API atua como uma escuta inteligente: ela coleta os comandos de fala livre do usuário, envia a mensagem para um modelo de inteligência artificial de ponta (rodando na plataforma da Groq) e devolve uma resposta natural por voz. 
+
+Além disso, a API agora possui **memória contínua de contexto**: cada interação (tanto a pergunta do usuário quanto a resposta da IA) é armazenada instantaneamente em um banco de dados PostgreSQL (via Neon e Drizzle ORM). Isso permite que a Alexa se lembre de tudo o que foi falado na sessão atual, mantendo um diálogo natural, inteligente e capaz de interpretar perguntas em sequência sem perder o fio da meada.
 
 <br/>
 
@@ -33,6 +37,10 @@ A **Alexa Cortex API** foi criada para resolver a limitação das respostas rote
 - **Groq SDK em vez de OpenAI?**
   **Escolha:** IA conversacional e rápida rodando nos hardwares avançados da Groq.
   **Motivo:** Esperar três segundos após fazer uma pergunta para uma máquina costuma criar silencios frustrantes. A Groq fornece os maiores processamentos de LLMs de maneira quase instantânea, o que se torna um requisito essencial para uma conversação fluida baseada em voz e para obedecer o tempo curto de timeout que o back-end da API é exposto.
+
+- **Drizzle ORM & Neon DB (PostgreSQL)**
+  **Escolha:** Banco de dados serverless rápido aliado a um ORM 100% tipado.
+  **Motivo:** Para manter uma "conversa contínua", a IA precisa do histórico recente. O Neon gerencia conexões HTTP ultrarrápidas nativas sem estourar o pool de banco, e o Drizzle traz segurança de tipos total (Type Safety) via TypeScript, garantindo gravações de memória da sessão e respostas no menor intervalo de milissegundos possíveis.
 
 - **Arquitetura Modularizada**
   **Escolha:** Código muito bem separado por blocos de áreas responsáveis (Alexa vs. Groq).
@@ -70,12 +78,13 @@ src/
 ### 4. Módulos Internos
 
 #### Módulo: Alexa
-Focado unicamente na Amazon AWS.
+Focado unicamente na Amazon AWS e na integridade do estado da conversa.
 | Operação | Descrição |
 |----------|-----------|
 | Intents | Analisa intenções padrões enviadas (`LaunchRequest` ou Fechar Skill) e mapeia nossos comandos específicos abertos de AI. |
-| Renders | Utilitário responsável por injetar `<speak>` para deixar a mensagem no formato final de interpretação por áudio. |
-| Timeouts | Cria preventivos para barrar instabilidades garantindo cancelamento gracioso. |
+| Repositório | Interage com Postgres via Drizzle para salvar mensagens do usuário e consultar o log histórico e formar a "memória da conversa" da IA. |
+| Renders | Utilitário responsável por injetar `<speak>` para deixar a mensagem no formato final de interpretação por áudio da Amazon. |
+| Timeouts | Previne "silêncios eternos" injetando um gerador local de fallback caso a resposta global demore demais, salvaguardando a conexão no banco. |
 
 #### Módulo: Groq
 Fábrica de respostas conversacionais da IA.
@@ -102,6 +111,7 @@ Crie o arquivo `.env` na pasta inicial baseando-se no cópia do `.env.example`. 
 | `HOST` | ❌ | IP principal nativo. Padrão `127.0.0.1` |
 | `BASE_URL` | ❌ | Prefixo do ambiente inicial visível |
 | `GROQ_API_KEY` | ✅ | Requisito: A chave privada de desenvolvedor para se integrar à LLM (Groq). |
+| `DATABASE_URL` | ✅ | Requisito: String de conexão PostgreSQL (Neon) para armazenar histórico das conversas. |
 
 ---
 
