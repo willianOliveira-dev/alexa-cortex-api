@@ -24,7 +24,8 @@ export default fp<FastifyCorsOptions>(
   async (app) => {
     app.register(cors, {
       origin: (origin, callback) => {
-        if (env.NODE_ENV !== 'production') {
+
+        if (!origin || env.NODE_ENV !== 'production') {
           return callback(null, true);
         }
         if (isAmazonOrigin(origin)) {
