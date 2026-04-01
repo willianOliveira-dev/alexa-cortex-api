@@ -20,6 +20,7 @@ const groqService = new GroqServices();
 const chatService = new ChatService(chatRepository, groqService);
 
 const STOP_INTENTS = ['AMAZON.StopIntent', 'AMAZON.CancelIntent'];
+const PASSTHROUGH_INTENTS = ['AMAZON.FallbackIntent', 'AMAZON.HelpIntent'];
 
 export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post('/webhook/alexa', {
@@ -41,6 +42,16 @@ export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
       const { request: alexaRequest, session } = request.body;
       const { sessionId } = session;
       const { userId } = session.user;
+
+      request.log.info(
+        {
+          type: alexaRequest.type,
+          sessionId,
+          hasSigCert: Boolean(request.headers['signaturecertchainurl']),
+          hasSig: Boolean(request.headers['signature']),
+        },
+        '[Alexa] Request recebido',
+      );
 
       switch (alexaRequest.type) {
         case 'LaunchRequest':
@@ -76,6 +87,15 @@ export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
 
       if (STOP_INTENTS.includes(intentName)) {
         return reply.send(renderGoodbye());
+      }
+
+      if (PASSTHROUGH_INTENTS.includes(intentName)) {
+        return reply.send(
+          renderSpeak(
+            'Pode me perguntar qualquer coisa! Estou aqui para ajudar.',
+            'Estou ouvindo. Pode perguntar.',
+          ),
+        );
       }
 
       if (intentName !== 'CapturaLivreIntent') {
