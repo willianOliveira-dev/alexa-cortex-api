@@ -16,7 +16,7 @@ export class GroqServices {
   private readonly defaultModel = 'llama-3.3-70b-versatile';
 
   async chat(messages: Message[], options: ChatOptions = {}): Promise<string> {
-    const { systemPrompt = ASSISTANT_SYSTEM_PROMPT, temperature = 0.7, maxTokens = 1024 } = options;
+    const { systemPrompt = ASSISTANT_SYSTEM_PROMPT, temperature = 0.4, maxTokens = 300 } = options;
 
     const fullMessages: Message[] = [{ role: 'system', content: systemPrompt }, ...messages];
 

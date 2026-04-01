@@ -5,6 +5,7 @@ import {
 } from '../../../shared/schemas/error.schema.js';
 import { GroqServices } from '../../groq/services/groq.service.js';
 import {
+  renderError,
   renderGoodbye,
   renderNotUnderstood,
   renderSpeak,
@@ -17,8 +18,6 @@ import { ChatService } from '../services/chat.service.js';
 const chatRepository = new ChatRepository();
 const groqService = new GroqServices();
 const chatService = new ChatService(chatRepository, groqService);
-
-const ALEXA_TIMEOUT_MS = 6_000;
 
 const STOP_INTENTS = ['AMAZON.StopIntent', 'AMAZON.CancelIntent'];
 
@@ -46,44 +45,61 @@ export const alexaRoutes: FastifyPluginAsyncZod = async (app) => {
       switch (alexaRequest.type) {
         case 'LaunchRequest':
           return reply.send(renderWelcome());
+
         case 'SessionEndedRequest':
-          return reply.send({ version: '1.0', response: {} });
+          request.log.info(
+            { sessionId, reason: alexaRequest.reason },
+            '[Alexa] SessionEndedRequest recebido',
+          );
+          reply.hijack();
+          reply.raw.writeHead(200);
+          reply.raw.end();
+          return;
+
         case 'IntentRequest':
           break;
-        default:
+
+        default: {
+          const _exhaustive: never = alexaRequest.type;
+          request.log.warn({ type: _exhaustive }, '[Alexa] Tipo de request desconhecido');
           return reply.send(renderNotUnderstood());
+        }
       }
 
       const intentName = alexaRequest.intent?.name ?? '';
+      const slotValue = alexaRequest.intent?.slots?.query?.value;
+
+      request.log.info(
+        { sessionId, intentName, slotValue },
+        '[Alexa] IntentRequest recebido',
+      );
 
       if (STOP_INTENTS.includes(intentName)) {
         return reply.send(renderGoodbye());
       }
 
       if (intentName !== 'CapturaLivreIntent') {
+        request.log.warn({ intentName }, '[Alexa] Intent não reconhecida');
         return reply.send(renderNotUnderstood());
       }
 
-      const query = alexaRequest.intent?.slots?.query?.value;
-
-      if (!query) {
+      if (!slotValue) {
+        request.log.warn({ intentName }, '[Alexa] Slot "query" vazio ou ausente');
         return reply.send(renderNotUnderstood());
       }
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
-          () =>
-            reject(new Error(`Alexa timeout após ${ALEXA_TIMEOUT_MS}ms — sessionId: ${sessionId}`)),
-          ALEXA_TIMEOUT_MS,
-        ),
-      );
+      try {
+        const aiResponse = await chatService.processUtterance({
+          sessionId,
+          userId,
+          query: slotValue,
+        });
 
-      const aiResponse = await Promise.race([
-        chatService.processUtterance({ sessionId, userId, query }),
-        timeoutPromise,
-      ]);
-
-      return reply.send(renderSpeak(aiResponse, 'Tem mais alguma dúvida?'));
+        return reply.send(renderSpeak(aiResponse, 'Tem mais alguma dúvida?'));
+      } catch (error: unknown) {
+        request.log.error({ sessionId, error }, '[Alexa] Erro crítico ao processar utterance');
+        return reply.send(renderError());
+      }
     },
   });
 };
